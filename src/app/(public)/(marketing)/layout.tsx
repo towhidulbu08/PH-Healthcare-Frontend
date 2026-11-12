@@ -1,8 +1,13 @@
-const layout = ({ children }: LayoutProps<"/">) => {
+import Footer from "@/components/layout/public/Footer";
+import Header from "@/components/layout/public/Header";
+import { ReactNode } from "react";
+
+const layout = ({ children }: { children: ReactNode }) => {
   return (
-    <div>
-      layout
-      {children}
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-1">{children}</main>
+      <Footer />
     </div>
   );
 };
