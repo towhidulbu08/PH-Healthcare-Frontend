@@ -8,6 +8,8 @@ import { useState } from "react";
 import { Button } from "../ui/button";
 import { Field, FieldError, FieldGroup, FieldLabel } from "../ui/field";
 import { Input } from "../ui/input";
+import { Spinner } from "../ui/spinner";
+import { toast } from "../ui/toast";
 
 const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -25,10 +27,19 @@ const LoginForm = () => {
       };
       login(loginData, {
         onSuccess: (res) => {
+          toast.add({
+            title: "Login Success",
+            description: "Welcome Back",
+            type: "success",
+          });
           router.push("/");
         },
         onError: (err) => {
-          console.log(err);
+          toast.add({
+            title: "Authorization Failure",
+            description:
+              err.message || "Something went wrong . Please try again",
+          });
         },
       });
     },
@@ -108,7 +119,16 @@ const LoginForm = () => {
             }}
           </form.Field>
 
-          <Button type="submit">Submit</Button>
+          <Button disabled={loginPending} type="submit">
+            {loginPending ? (
+              <>
+                <Spinner />
+                submitting
+              </>
+            ) : (
+              "Submit"
+            )}
+          </Button>
         </FieldGroup>
       </form>
     </div>
