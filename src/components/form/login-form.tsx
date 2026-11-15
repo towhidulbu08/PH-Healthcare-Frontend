@@ -1,5 +1,5 @@
 "use client";
-import { useLogin } from "@/hooks";
+import { useGoogleOAuth, useLogin } from "@/hooks";
 import { LoginZodSchema } from "@/validation";
 import { GoogleLogin } from "@react-oauth/google";
 import { useForm } from "@tanstack/react-form";
@@ -22,6 +22,7 @@ const LoginForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
   const { mutate: login, isPending: loginPending } = useLogin();
+  const { mutate: googleLogin } = useGoogleOAuth();
   const form = useForm({
     defaultValues: {
       email: "superadmin@gmail.com",
@@ -54,6 +55,51 @@ const LoginForm = () => {
       onSubmit: LoginZodSchema,
     },
   });
+
+  const handleGoogleLoginSuccess = (credentialResponse: {
+    credential?: string;
+  }) => {
+    const idToken = credentialResponse.credential;
+    if (!idToken) {
+      toast.add({
+        title: "Google OAuth Failed",
+        description: "Something Went Wrong, Please Try Again",
+        type: "error",
+      });
+      return;
+    }
+    googleLogin(
+      {
+        idToken,
+      },
+      {
+        onSuccess: () => {
+          toast.add({
+            title: "Logged In Successfully",
+            description: "Welcome back",
+            type: "success",
+          });
+
+          router.push("/");
+        },
+        onError: (err) => {
+          toast.add({
+            title: "Google OAuth Failed",
+            description:
+              err.message || "Something Went Wrong, Please Try Again",
+            type: "error",
+          });
+        },
+      },
+    );
+  };
+  const handleGoogleLoginError = () => {
+    toast.add({
+      title: "Google OAuth Failed",
+      description: "Something Went Wrong, Please Try Again",
+      type: "error",
+    });
+  };
   return (
     <div className="flex flex-col gap-4">
       <div className="flex items-center text-center flex-col gap-2">
@@ -138,8 +184,14 @@ const LoginForm = () => {
           </Button>
         </FieldGroup>
       </form>
-      <FieldSeparator>Or</FieldSeparator>
-      <GoogleLogin onSuccess={() => {}} onError={() => {}} />
+      <FieldSeparator>Or Continue With</FieldSeparator>
+      <GoogleLogin
+        theme="outline"
+        shape="pill"
+        text="continue_with"
+        onSuccess={handleGoogleLoginSuccess}
+        onError={handleGoogleLoginError}
+      />
     </div>
   );
 };
