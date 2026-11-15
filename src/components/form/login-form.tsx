@@ -1,11 +1,12 @@
 "use client";
 import { useGoogleOAuth, useLogin } from "@/hooks";
 import { LoginZodSchema } from "@/validation";
-import { GoogleLogin } from "@react-oauth/google";
 import { useForm } from "@tanstack/react-form";
 import { Eye, EyeClosed } from "lucide-react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
 import { Button } from "../ui/button";
 import {
   Field,
@@ -185,13 +186,17 @@ const LoginForm = () => {
         </FieldGroup>
       </form>
       <FieldSeparator>Or Continue With</FieldSeparator>
-      <GoogleLogin
-        theme="outline"
-        shape="pill"
-        text="continue_with"
-        onSuccess={handleGoogleLoginSuccess}
-        onError={handleGoogleLoginError}
-      />
+      <GoogleLoginComponent />
+
+      <div className="text-center text-sm text-muted-foreground">
+        Don&apos;t have and account?{" "}
+        <Link
+          className="font-medium underline underline-offset-4 hover:text-primary"
+          href="/register"
+        >
+          Register
+        </Link>
+      </div>
     </div>
   );
 };
