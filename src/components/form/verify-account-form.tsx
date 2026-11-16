@@ -1,7 +1,8 @@
 "use client";
 
+import { useVerifyAccount } from "@/hooks";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Button } from "../ui/button";
 import {
@@ -12,16 +13,58 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Field, FieldLabel } from "../ui/field";
+import { Field, FieldError, FieldLabel } from "../ui/field";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
+import { toast } from "../ui/toast";
 
 const VerifyAccountForm = () => {
   const searchParams = useSearchParams();
   const email = searchParams.get("email");
   const [otp, setOtp] = useState("");
+  const [isInvalid, setIsInvalid] = useState(false);
+  const router = useRouter();
+
+  const { mutate: verify, isPending: verifyPending } = useVerifyAccount();
   const handleOtp = () => {
-    console.log(otp);
+    if (otp.length !== 6) {
+      setIsInvalid(true);
+      return;
+    }
+    const verifyData = {
+      email,
+      otp,
+    };
+    verify(verifyData, {
+      onSuccess: (res) => {
+        if (!res.success) {
+          toast.add({
+            title: "Server Failure",
+            description: "Something went wrong. Please try again",
+            type: "error",
+          });
+        }
+
+        toast.add({
+          title: "Registration Successful",
+          description: "Please verify your account",
+          type: "success",
+        });
+
+        router.push("/");
+      },
+      onError: (err) => {
+        toast.add({
+          title: "Authorization failure",
+          description: err.message || "Something went wrong. Please try again",
+          type: "error",
+        });
+      },
+    });
   };
+  if (!email) {
+    router.push("/");
+    return null;
+  }
 
   return (
     <Card>
@@ -40,17 +83,20 @@ const VerifyAccountForm = () => {
             handleOtp();
           }}
         >
-          <Field>
+          <Field data-invalid={isInvalid}>
             <FieldLabel htmlFor="otp">OTP</FieldLabel>
             <InputOTP
               autoComplete="off"
               name="otp"
+              value={otp}
               id="otp"
               pattern={REGEXP_ONLY_DIGITS}
               maxLength={6}
               onChange={(value) => {
                 setOtp(value);
-                console.log("value", value);
+                if (isInvalid) {
+                  setIsInvalid(false);
+                }
               }}
             >
               <InputOTPGroup>
@@ -62,6 +108,11 @@ const VerifyAccountForm = () => {
                 <InputOTPSlot index={5} />
               </InputOTPGroup>
             </InputOTP>
+            {isInvalid && (
+              <FieldError
+                errors={[{ message: "Invalid Code.Please Try Again" }]}
+              />
+            )}
           </Field>
         </form>
       </CardContent>
