@@ -18,6 +18,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import z from "zod";
 import GoogleLoginComponent from "../modules/google-login/GoogleLogin";
+import { Spinner } from "../ui/spinner";
 import { toast } from "../ui/toast";
 
 export function RegisterForm() {
@@ -35,8 +36,8 @@ export function RegisterForm() {
     confirmPassword: "@Password123",
   };
 
-  const { mutate: registration } = useRegistration();
-
+  const { mutate: registration, isPending: registrationPending } =
+    useRegistration();
   const form = useForm({
     defaultValues,
     validators: {
@@ -263,7 +264,15 @@ export function RegisterForm() {
             }}
           </form.Field>
 
-          <Button type="submit">Submit</Button>
+          <Button disabled={registrationPending} type="submit">
+            {registrationPending ? (
+              <>
+                <Spinner /> submitting
+              </>
+            ) : (
+              "Submit"
+            )}
+          </Button>
         </FieldGroup>
       </form>
 
