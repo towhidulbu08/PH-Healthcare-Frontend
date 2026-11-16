@@ -28,11 +28,11 @@ export function RegisterForm() {
   type PatientDefaultValues = z.infer<typeof PatientRegistrationZodSchema>;
 
   const defaultValues: PatientDefaultValues = {
-    name: "",
-    email: "",
-    contactNumber: "",
-    password: "",
-    confirmPassword: "",
+    name: "Tamim",
+    email: "tamim@example.com",
+    contactNumber: "01712345678",
+    password: "@Password123",
+    confirmPassword: "@Password123",
   };
 
   const { mutate: registration } = useRegistration();
@@ -51,6 +51,7 @@ export function RegisterForm() {
           contactNumber: value.contactNumber,
         },
       };
+      console.log(value);
 
       registration(registrationData, {
         onSuccess: (res) => {
