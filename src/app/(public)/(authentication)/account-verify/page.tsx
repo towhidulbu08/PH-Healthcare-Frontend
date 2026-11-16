@@ -1,3 +1,5 @@
-export const AccountVerifyPage = () => {
-  return <div>Account Verify Page</div>;
+const AccountVeriyPage = () => {
+  return <div>AccountVeriyPage</div>;
 };
+
+export default AccountVeriyPage;
