@@ -12,7 +12,7 @@ export const userLogin = (payload: LoginPayload) => {
   });
 };
 export const verifyAccount = (payload: VerifyAccountPayload) => {
-  return apiClient("/auth/login", {
+  return apiClient("/auth/verify-email", {
     method: "POST",
     body: payload,
   });

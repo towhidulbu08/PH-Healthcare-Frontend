@@ -3,7 +3,7 @@
 import { useVerifyAccount } from "@/hooks";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../ui/button";
 import {
   Card,
@@ -13,18 +13,37 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { Field, FieldError, FieldLabel } from "../ui/field";
+import { Field, FieldDescription, FieldError, FieldLabel } from "../ui/field";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "../ui/input-otp";
 import { toast } from "../ui/toast";
 
+const RESEND_COOL_DOWN = 120; // seconds
+
 const VerifyAccountForm = () => {
   const searchParams = useSearchParams();
-  const email = searchParams.get("email");
+  const email = searchParams.get("email") || "";
   const [otp, setOtp] = useState("");
   const [isInvalid, setIsInvalid] = useState(false);
+  const [resentTimer, setResentTimer] = useState(RESEND_COOL_DOWN);
   const router = useRouter();
 
   const { mutate: verify, isPending: verifyPending } = useVerifyAccount();
+
+  useEffect(() => {
+    if (!email) {
+      router.push("/");
+    }
+  }, [email]);
+
+  useEffect(() => {
+    if (resentTimer <= 0) {
+      return;
+    }
+    const timer = setInterval(() => {
+      setResentTimer((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
   const handleOtp = () => {
     if (otp.length !== 6) {
       setIsInvalid(true);
@@ -45,8 +64,8 @@ const VerifyAccountForm = () => {
         }
 
         toast.add({
-          title: "Registration Successful",
-          description: "Please verify your account",
+          title: "Verification Successful",
+          description: "Welcome onBoard! You can now login to your account",
           type: "success",
         });
 
@@ -54,7 +73,7 @@ const VerifyAccountForm = () => {
       },
       onError: (err) => {
         toast.add({
-          title: "Authorization failure",
+          title: "Verification Failed",
           description: err.message || "Something went wrong. Please try again",
           type: "error",
         });
@@ -62,7 +81,6 @@ const VerifyAccountForm = () => {
     });
   };
   if (!email) {
-    router.push("/");
     return null;
   }
 
@@ -113,11 +131,14 @@ const VerifyAccountForm = () => {
                 errors={[{ message: "Invalid Code.Please Try Again" }]}
               />
             )}
+            <FieldDescription>
+              Resend in {resentTimer} seconds{" "}
+            </FieldDescription>
           </Field>
         </form>
       </CardContent>
       <CardFooter>
-        <Button>Resend</Button>
+        <Button disabled={resentTimer > 0}>Resend</Button>
         <Button type="submit" form="otp-form">
           Submit
         </Button>
