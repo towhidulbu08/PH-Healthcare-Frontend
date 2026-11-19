@@ -460,6 +460,7 @@ export default function DoctorApplyForm() {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               const file = field.state.value;
+              console.log("file", file);
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor="resume-field">Resume</FieldLabel>
@@ -478,6 +479,7 @@ export default function DoctorApplyForm() {
                       className="sr-only"
                       name={field.name}
                       onChange={(e) => {
+                        console.log("file change", e.target.files);
                         const selected = e.target.files?.[0] ?? null;
 
                         if (
