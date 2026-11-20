@@ -1,6 +1,6 @@
 "use client";
 
-import { useVerifyAccount } from "@/hooks";
+import { useVerifyAccount, useVerifyDoctorAccount } from "@/hooks";
 import { REGEXP_ONLY_DIGITS } from "input-otp";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -19,7 +19,11 @@ import { toast } from "../ui/toast";
 
 const RESEND_COOL_DOWN = 120; // seconds
 
-const VerifyAccountForm = () => {
+const VerifyAccountForm = ({
+  mode = "patient",
+}: {
+  mode: "doctor" | "patient";
+}) => {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") || "";
   const [otp, setOtp] = useState("");
@@ -27,14 +31,20 @@ const VerifyAccountForm = () => {
   const [resentTimer, setResentTimer] = useState(RESEND_COOL_DOWN);
   const router = useRouter();
 
-  const { mutate: verify, isPending: verifyPending } = useVerifyAccount();
+  const { mutate: verifyPatient, isPending: verifyPending } =
+    useVerifyAccount();
+  const { mutate: verifyDoctor } = useVerifyDoctorAccount();
 
+  const verify = mode === "doctor" ? verifyDoctor : verifyPatient;
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (!email) {
       router.push("/");
     }
   }, [email]);
 
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
     if (resentTimer <= 0) {
       return;
@@ -62,7 +72,18 @@ const VerifyAccountForm = () => {
             type: "error",
           });
         }
+        if (mode === "doctor") {
+          toast.add({
+            title: "Verification Successful",
+            description:
+              "An Admin will approve your account. This may take time.Please check your email in few days",
+            type: "success",
+          });
 
+          router.push("/");
+
+          return;
+        }
         toast.add({
           title: "Verification Successful",
           description: "Welcome onBoard! You can now login to your account",

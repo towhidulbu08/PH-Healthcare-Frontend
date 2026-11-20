@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/a11y/noLabelWithoutControl: <explanation> */
 "use client";
 
 import { Button } from "@/components/ui/button";
@@ -37,6 +38,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { toast } from "../ui/toast";
 
 //* Data signature
 // {
@@ -105,6 +107,25 @@ export default function DoctorApplyForm() {
         {
           onSuccess: (res) => {
             console.log(res);
+
+            if (!res.success) {
+              toast.add({
+                title: "Server Failure",
+                description: "Something went wrong. Please try again",
+                type: "error",
+              });
+              return;
+            }
+
+            toast.add({
+              title: "Application Submitted",
+              description: "Please verify your account",
+              type: "success",
+            });
+            const params = new URLSearchParams({
+              email: doctorData.user.email,
+            });
+            router.push(`/apply/verify-account?${params.toString()}`);
           },
         },
       );
@@ -466,6 +487,7 @@ export default function DoctorApplyForm() {
                   <FieldLabel htmlFor="resume-field">Resume</FieldLabel>
                   <div className="flex flex-wrap items-center gap-3">
                     <Button
+                      // biome-ignore lint/a11y/noLabelWithoutControl: <explanation>
                       render={<label htmlFor="resume-field" />}
                       nativeButton={false}
                       variant="outline"
@@ -531,6 +553,8 @@ export default function DoctorApplyForm() {
               const isInvalid =
                 field.state.meta.isTouched && !field.state.meta.isValid;
               const files = field.state.value;
+
+              console.log("files", files);
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor="additional-file-field">
@@ -553,6 +577,7 @@ export default function DoctorApplyForm() {
                       name={field.name}
                       onChange={(e) => {
                         const incoming = Array.from(e.target.files ?? []);
+                        console.log(e.target.files, "incoming");
 
                         if (incoming.length === 0) {
                           return;
