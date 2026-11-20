@@ -16,8 +16,6 @@ import { DoctorApplicationData } from "@/types";
 import { formatFileSize } from "@/utils";
 import {
   doctorApplicationSchema,
-  isAcceptedFileSize,
-  isAcceptedFileType,
   MAX_ADDITIONAL_FILES,
   MAX_FILE_SIZE,
 } from "@/validation";
@@ -522,15 +520,6 @@ export default function DoctorApplyForm() {
                         console.log("file change", e.target.files);
                         const selected = e.target.files?.[0] ?? null;
 
-                        if (
-                          selected &&
-                          (!isAcceptedFileSize(selected.size) ||
-                            !isAcceptedFileType(selected.type))
-                        ) {
-                          field.handleBlur();
-                          return;
-                        }
-
                         field.handleChange(selected);
                         e.target.value = "";
                       }}
@@ -604,19 +593,8 @@ export default function DoctorApplyForm() {
                           return;
                         }
 
-                        const invalid = incoming.some(
-                          (file) =>
-                            !isAcceptedFileSize(file.size) ||
-                            !isAcceptedFileType(file.type),
-                        );
-
-                        if (invalid) {
-                          field.handleBlur();
-                          e.target.value = "";
-                          return;
-                        }
-
                         field.handleChange([...files, ...incoming]);
+                        e.target.value = "";
                       }}
                     />
                     {files.length > 0 && (
