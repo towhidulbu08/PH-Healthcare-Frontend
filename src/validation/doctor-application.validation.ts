@@ -23,16 +23,24 @@ export function isAcceptedFileType(fileType: string) {
   return ACCEPTED_FILE_TYPES.includes(fileType);
 }
 
+export const getCustomFileSchema = <T>(msg: string) =>
+  z.custom<T>(
+    (value) =>
+      value === null ||
+      (value instanceof File &&
+        isAcceptedFileSize(value.size) &&
+        isAcceptedFileType(value.type)),
+    {
+      message: msg,
+    },
+  );
 export const doctorApplicationSchema = z.object({
   name: z.string().trim().min(2, "Name must be at least 2 characters long"),
 
-  email: z.email("Invalid email address").trim(),
+  email: z.email("Invalid email address"),
   phone: z.string().trim().min(5, "Contact number is invalid"),
 
-  address: z
-    .string()
-    .trim()
-    .min(5, "Address must be at least 5 characters long"),
+  address: z.string().trim(),
   specialization: z.string().trim().min(2, "Specialization is required"),
 
   licenseNumber: z.string().trim().min(3, "License number is required"),
@@ -40,11 +48,42 @@ export const doctorApplicationSchema = z.object({
   qualifications: z.string().trim().min(2, "Qualifications are required"),
 
   // Handles converting incoming FormData strings like "12" into an integer number
-  experienceYears: z.string().trim(),
+  experienceYears: z
+    .string()
+    .trim()
+    .refine((value) => /^\d+$/.test(value), {
+      message: "Experience years must be a positive integer number",
+    })
+    .refine((value) => Number(value) >= 0 && Number(value) <= 60, {
+      message: "Years of experience must be between 0 and 60",
+    }),
   bio: z
     .string()
     .trim()
     .max(MAX_BIO_LENGTH, `Bio cannot exceed${MAX_BIO_LENGTH} characters`),
   // Handles converting incoming FormData strings like "150.00" into a float number
-  consultationFee: z.string().trim(),
+  consultationFee: z
+    .string()
+    .trim()
+    .refine(
+      (value) => value === "" || (/^\d+$/.test(value) && Number(value) >= 0),
+      {
+        message: "Consultation fee must be a non-zero positive number",
+      },
+    ),
+  resume: getCustomFileSchema<File | null>(
+    `Resume must be a PDF,DOC,DOCX, or an image file under ${MAX_FILE_SIZE}MB`,
+  ).refine((value) => value instanceof File, {
+    message: "A resume or cv is required",
+  }),
+  additionalFiles: z
+    .array(
+      getCustomFileSchema<File>(
+        `Files must be PDF,DOC,DOCX, or image files under ${MAX_FILE_SIZE}MB`,
+      ),
+    )
+    .max(
+      MAX_ADDITIONAL_FILES,
+      `You can attach at most${MAX_ADDITIONAL_FILES} supporting documents`,
+    ),
 });

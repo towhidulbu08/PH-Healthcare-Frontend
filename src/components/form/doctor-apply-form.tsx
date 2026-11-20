@@ -15,6 +15,7 @@ import { useApplyAsDoctor } from "@/hooks";
 import { DoctorApplicationData } from "@/types";
 import { formatFileSize } from "@/utils";
 import {
+  doctorApplicationSchema,
   isAcceptedFileSize,
   isAcceptedFileType,
   MAX_ADDITIONAL_FILES,
@@ -63,19 +64,36 @@ export default function DoctorApplyForm() {
   const { mutate: apply, isPending: applyPending } = useApplyAsDoctor();
 
   const form = useForm({
+    // defaultValues: {
+    //   name: "Mir Hussain",
+    //   email: "drmir@gmail.com",
+    //   phone: "01912345678",
+    //   address: "Neptune",
+    //   specialization: "Cardiologist",
+    //   licenseNumber: "ABC123",
+    //   qualifications: "MBBS",
+    //   experienceYears: "50",
+    //   consultationFee: "10000",
+    //   bio: "My life, my rules.",
+    //   resume: null as File | null,
+    //   additionalFiles: [] as File[],
+    // },
     defaultValues: {
-      name: "Mir Hussain",
-      email: "drmir@gmail.com",
-      phone: "01912345678",
-      address: "Neptune",
-      specialization: "Cardiologist",
-      licenseNumber: "ABC123",
-      qualifications: "MBBS",
-      experienceYears: "50",
-      consultationFee: "10000",
-      bio: "My life, my rules.",
+      name: "",
+      email: "",
+      phone: "",
+      address: "",
+      specialization: "",
+      licenseNumber: "",
+      qualifications: "",
+      experienceYears: "",
+      consultationFee: "",
+      bio: "",
       resume: null as File | null,
       additionalFiles: [] as File[],
+    },
+    validators: {
+      onSubmit: doctorApplicationSchema,
     },
 
     onSubmit: async ({ value }) => {
@@ -558,7 +576,10 @@ export default function DoctorApplyForm() {
               return (
                 <Field data-invalid={isInvalid}>
                   <FieldLabel htmlFor="additional-file-field">
-                    Resume
+                    Additional Files
+                    <span className="font-normal text-muted-foreground">
+                      (optional)
+                    </span>
                   </FieldLabel>
                   <div className="flex flex-wrap items-center gap-3">
                     <Button
