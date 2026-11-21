@@ -1,9 +1,12 @@
-const layout = ({ children }: LayoutProps<"/">) => {
+import AuthGuard from "@/components/auth/auth-guard";
+import { ReactNode } from "react";
+
+const layout = ({ children }: { children: ReactNode }) => {
   return (
-    <div>
+    <AuthGuard>
       Dashboard Layout
       {children}
-    </div>
+    </AuthGuard>
   );
 };
 
