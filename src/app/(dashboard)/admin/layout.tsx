@@ -1,9 +1,13 @@
+import RoleGuard from "@/components/auth/role-guard";
+
 const AdminLayout = ({ children }: LayoutProps<"/admin">) => {
   return (
-    <div>
-      Admin Layout
-      {children}
-    </div>
+    <RoleGuard roles={["ADMIN"]}>
+      <div>
+        Admin Layout
+        {children}
+      </div>
+    </RoleGuard>
   );
 };
 
