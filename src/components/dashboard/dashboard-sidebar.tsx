@@ -1,3 +1,4 @@
+"use client";
 import Logo from "@/assets/svg/Logo";
 import {
   Sidebar,
@@ -11,47 +12,25 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { adminRoutes, doctorRoutes, patientRoutes } from "@/routes";
+import { UserRole } from "@/types";
+import { SideBarItems } from "@/types/sidebar.type";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 
-// This is sample data.
-const data = {
-  navMain: [
-    {
-      title: "Management",
-      url: "#",
-      items: [
-        {
-          title: "Overview",
-          url: "/admin",
-        },
-        {
-          title: "Doctor Appointments",
-          url: "/admin/approve-doctor",
-        },
-      ],
-    },
-    {
-      title: "App Settings",
-      url: "#",
-      items: [
-        {
-          title: "Routing",
-          url: "#",
-        },
-        {
-          title: "Data Fetching",
-          url: "#",
-          isActive: true,
-        },
-      ],
-    },
-  ],
+const sidebarRoutes: Partial<Record<UserRole, SideBarItems>> = {
+  ADMIN: adminRoutes,
+  DOCTOR: doctorRoutes,
+  PATIENT: patientRoutes,
+  SUPER_ADMIN: adminRoutes,
 };
 
-export function DashboardSidebar({
-  ...props
-}: React.ComponentProps<typeof Sidebar>) {
+export function DashboardSidebar({ role }: { role: UserRole }) {
+  const routes: SideBarItems = sidebarRoutes[role] || [];
+  const pathname = usePathname();
+  console.log("pathname", pathname);
   return (
-    <Sidebar {...props}>
+    <Sidebar>
       <SidebarHeader>
         <div className="flex items-center gap-2">
           <Logo />
@@ -59,15 +38,18 @@ export function DashboardSidebar({
         </div>
       </SidebarHeader>
       <SidebarContent>
-        {data.navMain.map((item) => (
+        {routes.map((item) => (
           <SidebarGroup key={item.title}>
             <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {item.items.map((item) => (
                   <SidebarMenuItem key={item.title}>
-                    <SidebarMenuButton asChild isActive={item.isActive}>
-                      <a href={item.url}>{item.title}</a>
+                    <SidebarMenuButton
+                      render={<Link href={item.url} />}
+                      isActive={pathname === item.url}
+                    >
+                      {item.title}
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
