@@ -32,10 +32,12 @@ export function DashboardSidebar({ role }: { role: UserRole }) {
   return (
     <Sidebar>
       <SidebarHeader>
-        <div className="flex items-center gap-2">
-          <Logo />
-          <span> PH Healthcare</span>
-        </div>
+        <Link href={"/"}>
+          <div className="flex items-center gap-2">
+            <Logo />
+            <span> PH Healthcare</span>
+          </div>
+        </Link>
       </SidebarHeader>
       <SidebarContent>
         {routes.map((item) => (
